@@ -2,12 +2,26 @@ from sklearn.ensemble import RandomForestRegressor
 import pandas as pd
 from sklearn.model_selection import train_test_split
 import pickle
-import sys
 from datetime import datetime
+import os
+from dotenv import load_dotenv
+import psycopg2
 
-df_path = sys.argv[-1] 
+load_dotenv()
 
-df = pd.read_parquet(df_path)
+db_host = os.getenv("DB_HOST")
+db_user = os.getenv("DB_USER")
+db_password = os.getenv("DB_PASSWORD")
+db_name = os.getenv("DB_DATABASE")
+
+connection = psycopg2.connect(
+    host=db_host,
+    user=db_user,
+    password=db_password,
+    dbname=db_name
+)
+
+df = pd.read_sql_query("SELECT store_id, year, month, day, weekday, total_sales FROM sales_analytics.view_abt_train_antoniovf;", connection)
 
 X = df.drop("total_sales", axis=1)
 y = df["total_sales"]
